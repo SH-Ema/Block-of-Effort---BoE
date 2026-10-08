@@ -1,51 +1,38 @@
-# Battle of Elements Frontend
+# Block of Code
 
-A React-based frontend for the Battle of Elements Solana program, allowing users to create and join teams using their Solana wallet.
+Block of Code is a student project built with React and Solana. The idea is to let coaches create teams, players join them using a code, and track participation with points.
+
+The project is still a work in progress.
 
 ## Features
 
-- Connect Solana wallet (Phantom)
-- Create teams with generated codes
-- Join teams using team codes
-- Modern UI with responsive design
+- Connect a Phantom wallet
+- Create and join teams using team codes
+- Leave a team or remove a player
+- Record attendance and skills
+- Track points for players
 
-## Tech Stack
+Some features are not fully tested on Solana Devnet yet.
 
-- React 19
+## Technologies
+
+- React
 - TypeScript
 - Vite
-- Solana Web3.js
-- Anchor framework
-- Wallet Adapter
+- Solana
+- Anchor (Rust)
+- Phantom Wallet
 
-## Getting Started
+## How to run the frontend
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+1. Install Node.js.
+2. Open a terminal in `app/BoE-frontend`.
+3. Install the dependencies: `npm install`
+4. Start the development server: `npm run dev`
+5. Open the local address shown in the terminal.
 
-2. Start development server:
-   ```bash
-   npm run dev
-   ```
+A Phantom wallet and access to Solana Devnet are needed to try blockchain features.
 
-3. Build for production:
-   ```bash
-   npm run build
-   ```
+## Note
 
-## Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-
-## Configuration
-
-The app connects to Solana Devnet by default. Update the network in `src/main.tsx` if needed.
-
-## Program Integration
-
-The frontend interacts with the Battle of Elements Anchor program deployed on Solana.
+This is a university learning project. Some parts of the blockchain integration and testing are unfinished.
