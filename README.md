@@ -1,6 +1,6 @@
 # Block of Code - work in progress
 
-Block of Code is a student project built with React and Solana through the Solana Developer Bootcamp. The idea is to let coaches create teams, players join them using a code, and track participation with points.
+Block of Effort is a student project built with React and Solana through the Solana Developer Bootcamp. The idea is to let coaches create teams, players join them using a code, and track participation with points.
 
 The project is still a work in progress.
 
