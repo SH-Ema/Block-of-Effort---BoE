@@ -3,6 +3,7 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js'
 import { useAnchorProgram } from './hooks/useAnchorProgram'
+import type { TeamData, PlayerData } from './hooks/useAnchorProgram'
 import './App.css'
 
 const PROGRAM_ID = new PublicKey('2D8rWNeqJENDSjT2vEpWGcQjc4tcYArccEGtcrgBduMQ')
@@ -19,10 +20,18 @@ function App() {
   const [logTeamCode, setLogTeamCode] = useState('')
   const [logPlayer, setLogPlayer] = useState('')
   const [userRole, setUserRole] = useState<'coach' | 'player' | null>(null)
-  const [teamData, setTeamData] = useState<any>(null)
-  const [playerData, setPlayerData] = useState<any>(null)
+  const [teamData, setTeamData] = useState<TeamData | null>(null)
+  const [playerData, setPlayerData] = useState<PlayerData | null>(null)
   const [fetchCode, setFetchCode] = useState('')
   const [error, setError] = useState('')
+
+  const validateTeamCode = (code: string) => {
+    if (!/^[A-Z]{6}$/.test(code)) {
+      setError('Team code must be exactly six uppercase letters (A–Z).')
+      return false
+    }
+    return true
+  }
 
   const createTeam = async () => {
     if (!publicKey || !program) return
@@ -34,7 +43,7 @@ function App() {
       const codeBytes = new Uint8Array(code.split('').map(c => c.charCodeAt(0)))
       const [teamAddress] = PublicKey.findProgramAddressSync([new TextEncoder().encode('team'), codeBytes], PROGRAM_ID)
 
-      const tx = await program.methods
+      await program.methods
         .createTeam(Array.from(codeBytes))
         .accounts({
           team: teamAddress,
@@ -52,6 +61,7 @@ function App() {
 
   const joinTeam = async (code: string) => {
     if (!publicKey || !program || !code) return
+    if (!validateTeamCode(code)) return
 
     setLoading(true)
     setError('')
@@ -60,7 +70,7 @@ function App() {
       const [teamKey] = PublicKey.findProgramAddressSync([new TextEncoder().encode('team'), codeBytes], PROGRAM_ID)
       const [playerKey] = PublicKey.findProgramAddressSync([new TextEncoder().encode('player'), publicKey.toBytes()], PROGRAM_ID)
 
-      const tx = await program.methods
+      await program.methods
         .joinTeam(Array.from(codeBytes))
         .accounts({
           team: teamKey,
@@ -78,6 +88,7 @@ function App() {
 
   const leaveTeam = async () => {
     if (!publicKey || !program || !leaveCode) return
+    if (!validateTeamCode(leaveCode)) return
 
     setLoading(true)
     setError('')
@@ -86,7 +97,7 @@ function App() {
       const [teamKey] = PublicKey.findProgramAddressSync([new TextEncoder().encode('team'), codeBytes], PROGRAM_ID)
       const [playerKey] = PublicKey.findProgramAddressSync([new TextEncoder().encode('player'), publicKey.toBytes()], PROGRAM_ID)
 
-      const tx = await program.methods
+      await program.methods
         .leaveTeam()
         .accounts({
           team: teamKey,
@@ -104,6 +115,7 @@ function App() {
 
   const kickPlayerFunc = async () => {
     if (!publicKey || !program || !kickPlayer || !kickTeamCode) return
+    if (!validateTeamCode(kickTeamCode)) return
 
     setLoading(true)
     setError('')
@@ -113,7 +125,7 @@ function App() {
       const playerPubkey = new PublicKey(kickPlayer)
       const [playerKey] = PublicKey.findProgramAddressSync([new TextEncoder().encode('player'), playerPubkey.toBytes()], PROGRAM_ID)
 
-      const tx = await program.methods
+      await program.methods
         .kickPlayer()
         .accounts({
           team: teamKey,
@@ -131,6 +143,7 @@ function App() {
 
   const logAttendance = async () => {
     if (!publicKey || !program || !logTeamCode || !logPlayer || !logComment) return
+    if (!validateTeamCode(logTeamCode)) return
 
     setLoading(true)
     setError('')
@@ -141,7 +154,7 @@ function App() {
       const [playerKey] = PublicKey.findProgramAddressSync([new TextEncoder().encode('player'), playerPubkey.toBytes()], PROGRAM_ID)
       const logKeypair = Keypair.generate()
 
-      const tx = await program.methods
+      await program.methods
         .logAttendance(logComment)
         .accounts({
           log: logKeypair.publicKey,
@@ -162,6 +175,7 @@ function App() {
 
   const logSkill = async () => {
     if (!publicKey || !program || !logTeamCode || !logPlayer || !logComment) return
+    if (!validateTeamCode(logTeamCode)) return
 
     setLoading(true)
     setError('')
@@ -172,7 +186,7 @@ function App() {
       const [playerKey] = PublicKey.findProgramAddressSync([new TextEncoder().encode('player'), playerPubkey.toBytes()], PROGRAM_ID)
       const logKeypair = Keypair.generate()
 
-      const tx = await program.methods
+      await program.methods
         .logSkill(logComment)
         .accounts({
           log: logKeypair.publicKey,
@@ -193,11 +207,12 @@ function App() {
 
   const fetchTeam = async () => {
     if (!program || !fetchCode) return
+    if (!validateTeamCode(fetchCode)) return
 
     try {
       const codeBytes = new Uint8Array(fetchCode.split('').map(c => c.charCodeAt(0)))
       const [teamKey] = PublicKey.findProgramAddressSync([new TextEncoder().encode('team'), codeBytes], PROGRAM_ID)
-      const team = await (program.account as any).Team.fetch(teamKey)
+      const team = await program.account.team.fetch(teamKey)
       setTeamData(team)
       setError(`Team fetched: Coach ${team.coach}, Players: ${team.players.length}`)
     } catch (error) {
@@ -210,7 +225,7 @@ function App() {
 
     try {
       const [playerKey] = PublicKey.findProgramAddressSync([new TextEncoder().encode('player'), publicKey.toBytes()], PROGRAM_ID)
-      const player = await (program.account as any).Player.fetch(playerKey)
+      const player = await program.account.player.fetch(playerKey)
       setPlayerData(player)
       setError(`Player tokens: ${player.tokens}`)
     } catch (error) {
@@ -274,7 +289,7 @@ function App() {
                     <p><strong>Coach:</strong> {teamData.coach.toString()}</p>
                     <p><strong>Players:</strong></p>
                     <ul>
-                      {teamData.players.map((p: any, i: number) => (
+                      {teamData.players.map((p, i) => (
                         <li key={i}>{p.toString()}</li>
                       ))}
                     </ul>
@@ -339,8 +354,8 @@ function App() {
 
                 {playerData && (
                   <div className="player-info">
-                    <p><strong>Tokens:</strong> {playerData.tokens}</p>
-                    <p><strong>Last Active:</strong> {new Date(playerData.lastActive * 1000).toLocaleString()}</p>
+                    <p><strong>Tokens:</strong> {playerData.tokens.toString()}</p>
+                    <p><strong>Last Active:</strong> {new Date(playerData.lastActive.toNumber() * 1000).toLocaleString()}</p>
                   </div>
                 )}
 
