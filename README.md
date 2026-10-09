@@ -1,6 +1,6 @@
-# Block of Code
+# Block of Code - work in progress
 
-Block of Code is a student project built with React and Solana. The idea is to let coaches create teams, players join them using a code, and track participation with points.
+Block of Code is a student project built with React and Solana through the Solana Developer Bootcamp. The idea is to let coaches create teams, players join them using a code, and track participation with points.
 
 The project is still a work in progress.
 
@@ -33,6 +33,4 @@ Some features are not fully tested on Solana Devnet yet.
 
 A Phantom wallet and access to Solana Devnet are needed to try blockchain features.
 
-## Note
 
-This is a university learning project. Some parts of the blockchain integration and testing are unfinished.
